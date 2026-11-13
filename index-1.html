@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>Study Hub</title>
+<style>
+:root{--bg:#f5f6fb;--panel:#fff;--text:#182033;--muted:#687386;--line:#e5e8f0;--accent:#6557df;--soft:#eeecff}
+[data-theme=dark]{--bg:#0b1020;--panel:#151d30;--text:#edf1fb;--muted:#a5afc2;--line:#29334a;--accent:#a99cff;--soft:#292545}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:4}
+.bar{max-width:1180px;margin:auto;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-size:22px;font-weight:850;letter-spacing:-.7px}.logo span{color:var(--accent)}
+button,input,select{font:inherit;border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:var(--panel);color:var(--text)}
+button{cursor:pointer}button.primary{background:var(--accent);border-color:var(--accent);color:white;font-weight:700}
+button.danger{color:#c33}.wrap{max-width:1180px;margin:auto;padding:23px 16px 50px}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:18px}.top h1{font-size:clamp(27px,5vw,38px);margin:0 0 5px}.top p{margin:0;color:var(--muted)}
+.search{width:min(100%,320px)}
+.grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(270px,.8fr);gap:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:17px;overflow:hidden}
+.playerhead{padding:14px 16px;border-bottom:1px solid var(--line)}.playerhead h2{font-size:17px;margin:0}.playerhead p{color:var(--muted);font-size:12px;margin:4px 0 0}
+.frame{aspect-ratio:16/9;background:#05070c}.frame iframe{width:100%;height:100%;border:0}.note{padding:11px 14px;color:var(--muted);font-size:12px}
+.sidebar h2{font-size:16px;margin:0;padding:15px;border-bottom:1px solid var(--line)}
+.items{padding:8px;display:grid;gap:6px;max-height:470px;overflow:auto}
+.entry{display:flex;align-items:center;gap:9px;text-align:left;width:100%;background:transparent;border-color:transparent;padding:10px}
+.entry.active,.entry:hover{background:var(--soft);border-color:var(--line)}
+.entry .dot{width:32px;height:32px;flex:none;border-radius:9px;background:var(--soft);color:var(--accent);display:grid;place-items:center;font-weight:800}
+.entry small{display:block;color:var(--muted);font-size:11px}.entry strong{font-size:13px}
+.sectionbar{display:flex;justify-content:space-between;align-items:center;margin:25px 0 10px}.sectionbar h2{font-size:19px;margin:0}
+.manage{padding:16px}.manage h3{margin:0 0 12px;font-size:16px}.formrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.formrow input,.formrow select{flex:1;min-width:150px}
+.subjects{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.subject{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px}
+.subjecttop{display:flex;justify-content:space-between;gap:8px;align-items:center}.subject h3{margin:0;font-size:16px}.subject p{margin:5px 0 10px;color:var(--muted);font-size:12px}
+.videoitem{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding:9px 0;font-size:13px}
+.videoitem button{padding:5px 8px;font-size:12px}.empty{color:var(--muted);font-size:13px;padding:10px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}.fineprint{margin-top:17px;padding:13px 15px;border:1px solid var(--line);border-radius:13px;color:var(--muted);font-size:12px;background:var(--panel)}
+@media(max-width:780px){.grid{grid-template-columns:1fr}.top{display:block}.search{width:100%;margin-top:13px}.items{max-height:280px}}
+</style>
+</head>
+<body>
+<header><div class="bar"><div class="logo">Study<span>Hub</span></div><button id="theme">🌙 Dark mode</button></div></header>
+<main class="wrap">
+<div class="top"><div><h1>Study smarter, in one place.</h1><p>Your subjects, playlists and lessons — all together.</p></div><input class="search" id="filter" placeholder="Search subjects or videos…"></div>
+<div class="grid">
+<section class="panel">
+ <div class="playerhead"><h2 id="playingTitle">Choose a playlist or video</h2><p id="playingSub">Playback stays inside Study Hub whenever YouTube allows embedding.</p></div>
+ <div class="frame"><iframe id="player" title="Study Hub video player" src="about:blank" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+ <div class="note">Use the embedded YouTube controls for play, pause, seek, volume and fullscreen. Playlist navigation appears in the YouTube player when available.</div>
+</section>
+<aside class="panel sidebar"><h2>Subjects & playlists</h2><div class="items" id="nav"></div></aside>
+</div>
+<div class="sectionbar"><h2>Manage your Study Hub</h2><span style="font-size:12px;color:var(--muted)">Add your own content</span></div>
+<section class="panel manage">
+ <h3>➕ Add a subject</h3>
+ <form id="subjectForm" class="formrow"><input id="subjectName" placeholder="e.g. Mathematics" required maxlength="60"><button class="primary">Add subject</button></form>
+ <h3 style="margin-top:18px">🎬 Add a video or YouTube playlist</h3>
+ <form id="videoForm">
+  <div class="formrow"><select id="subjectSelect" required><option value="">Choose subject</option></select><input id="videoTitle" placeholder="Video / playlist title" required maxlength="100"></div>
+  <div class="formrow"><input id="videoUrl" type="url" placeholder="Paste YouTube video or playlist link" required><button class="primary">Add to subject</button></div>
+ </form>
+ <div class="tools"><button id="export">Export backup (JSON)</button><label style="display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:11px;padding:8px 11px;cursor:pointer">Import backup <input id="import" type="file" accept="application/json" hidden></label></div>
+</section>
+<div class="sectionbar"><h2>Your subjects</h2><span id="totals" style="font-size:12px;color:var(--muted)"></span></div>
+<div class="subjects" id="subjectCards"></div>
+<div class="fineprint"><b>Important:</b> Your changes are saved in this browser on this device. Export JSON regularly as a backup. For everyone to see your additions on the public GitHub Pages website, the updated data must also be published to the website repository. Private, deleted, age-restricted, region-restricted or embedding-disabled YouTube videos may not play; this site cannot bypass YouTube restrictions.</div>
+</main>
+<script>
+const initial=[
+{id:"PLQZf6HT5xLZY",title:"Saved playlist 1",kind:"playlist",subject:"Unsorted"},
+{id:"PLe93hCm_-p5g",title:"Saved playlist 2",kind:"playlist",subject:"Unsorted"},
+{id:"PLRXt1NVi58nxynymfthdWOl9cUGSo3SFI",title:"Saved playlist 3",kind:"playlist",subject:"Unsorted"},
+{id:"PLRXt1NVi58nx4MCx_ZOV6r-dx44LKEjlM",title:"Saved playlist 4",kind:"playlist",subject:"Unsorted"},
+{id:"PLRXt1NVi58nwqlPdf3Lx8amnPWiXeJ4lb",title:"Saved playlist 5",kind:"playlist",subject:"Unsorted"}
+];
+let data;
+try{data=JSON.parse(localStorage.getItem("studyhub-data"))||{subjects:["Unsorted"],items:initial}}catch(e){data={subjects:["Unsorted"],items:initial}}
+if(!data.subjects.includes("Unsorted"))data.subjects.unshift("Unsorted");
+const $=id=>document.getElementById(id);
+function save(){localStorage.setItem("studyhub-data",JSON.stringify(data));render()}
+function parseYoutube(raw){
+ try{const u=new URL(raw);const v=u.searchParams.get("v");const list=u.searchParams.get("list");
+ if(list)return {kind:"playlist",id:list};
+ if(v)return {kind:"video",id:v};
+ if(u.hostname.includes("youtu.be"))return {kind:"video",id:u.pathname.slice(1)};
+ const m=u.pathname.match(/\/(shorts|embed)\/([^/?]+)/);if(m)return {kind:"video",id:m[2]};
+ }catch(e){}
+ return null;
+}
+function play(item){
+ $("playingTitle").textContent=item.title;
+ $("playingSub").textContent=item.kind==="playlist"?"YouTube playlist · "+item.subject:"YouTube video · "+item.subject;
+ const src=item.kind==="playlist"?"https://www.youtube-nocookie.com/embed/videoseries?list="+encodeURIComponent(item.id):"https://www.youtube-nocookie.com/embed/"+encodeURIComponent(item.id);
+ $("player").src=src;
+ document.querySelectorAll(".entry").forEach(x=>x.classList.toggle("active",x.dataset.key===item.kind+":"+item.id));
+}
+function render(){
+ $("nav").innerHTML="";$("subjectSelect").innerHTML='<option value="">Choose subject</option>';
+ const filter=$("filter").value.toLowerCase();
+ let visible=0;
+ data.subjects.forEach((s,i)=>{
+  const its=data.items.filter(x=>x.subject===s);
+  const match=s.toLowerCase().includes(filter)||its.some(x=>x.title.toLowerCase().includes(filter));
+  if(match){const b=document.createElement("button");b.className="entry";b.innerHTML='<span class="dot">'+(i+1)+'</span><span><strong></strong><small>'+its.length+' item(s)</small></span>';b.querySelector("strong").textContent=s;b.onclick=()=>{if(its[0])play(its[0]);$("subjectCards").scrollIntoView({behavior:"smooth",block:"start"})};$("nav").append(b);visible++}
+  const opt=document.createElement("option");opt.value=s;opt.textContent=s;$("subjectSelect").append(opt);
+ });
+ if(!visible)$("nav").innerHTML='<div class="empty">No matching subject found.</div>';
+ $("subjectCards").innerHTML="";
+ data.subjects.forEach(s=>{
+  const its=data.items.filter(x=>x.subject===s);
+  if(filter&&!s.toLowerCase().includes(filter)&&!its.some(x=>x.title.toLowerCase().includes(filter)))return;
+  const card=document.createElement("article");card.className="subject";
+  const top=document.createElement("div");top.className="subjecttop";const h=document.createElement("h3");h.textContent=s;const del=document.createElement("button");del.className="danger";del.textContent="Delete";del.disabled=s==="Unsorted";del.onclick=()=>{if(confirm("Delete subject and move its videos to Unsorted?")){data.items.forEach(x=>{if(x.subject===s)x.subject="Unsorted"});data.subjects=data.subjects.filter(x=>x!==s);save()}};top.append(h,del);card.append(top);
+  const p=document.createElement("p");p.textContent=its.length+" saved video(s) / playlist(s)";card.append(p);
+  its.forEach(it=>{const row=document.createElement("div");row.className="videoitem";const name=document.createElement("span");name.textContent=(it.kind==="playlist"?"▤ ":"▶ ")+it.title;const controls=document.createElement("span");const open=document.createElement("button");open.textContent="Play";open.onclick=()=>play(it);const remove=document.createElement("button");remove.textContent="×";remove.title="Remove";remove.onclick=()=>{data.items=data.items.filter(x=>x!==it);save()};controls.append(open,remove);row.append(name,controls);card.append(row)});
+  if(!its.length){const empty=document.createElement("div");empty.className="empty";empty.textContent="No videos yet. Add one above.";card.append(empty)}
+  $("subjectCards").append(card);
+ });
+ $("totals").textContent=data.subjects.length+" subjects · "+data.items.length+" videos/playlists";
+}
+$("subjectForm").addEventListener("submit",e=>{e.preventDefault();const name=$("subjectName").value.trim();if(!name)return;if(data.subjects.some(s=>s.toLowerCase()===name.toLowerCase()))return alert("This subject already exists.");data.subjects.push(name);$("subjectName").value="";save()});
+$("videoForm").addEventListener("submit",e=>{e.preventDefault();const subject=$("subjectSelect").value,title=$("videoTitle").value.trim(),parsed=parseYoutube($("videoUrl").value.trim());if(!subject)return alert("Choose a subject.");if(!parsed)return alert("Valid YouTube video or playlist link paste karo.");data.items.push({...parsed,title,subject});$("videoTitle").value="";$("videoUrl").value="";save()});
+$("filter").addEventListener("input",render);
+$("theme").onclick=()=>{const dark=document.documentElement.dataset.theme!=="dark";document.documentElement.dataset.theme=dark?"dark":"light";$("theme").textContent=dark?"☀️ Light mode":"🌙 Dark mode";localStorage.setItem("studyhub-theme",dark?"dark":"light")};
+if(localStorage.getItem("studyhub-theme")==="dark"){$("theme").click()}
+$("export").onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="studyhub-backup.json";a.click();URL.revokeObjectURL(a.href)};
+$("import").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.subjects)||!Array.isArray(d.items))throw Error();data=d;if(!data.subjects.includes("Unsorted"))data.subjects.unshift("Unsorted");save();alert("Backup imported.")}catch(err){alert("This backup file is not valid.")}e.target.value=""};
+render();
+</script>
+</body></html>
